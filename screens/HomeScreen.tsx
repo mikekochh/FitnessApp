@@ -2,15 +2,16 @@ import React from 'react';
 import { SafeAreaView, StyleSheet, Button, Text, View } from 'react-native';
 import styles from '../components/styles';
 import { useEffect, useState } from 'react';
+import { User } from '../components/types';
 
 const HomeScreen = ({ navigation }) => {
 
-  const [message, setMessage] = useState("");
+  const [user, setUser] = useState<User>({} as User);
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/hello')
+    fetch(process.env.DOMAIN_URL + '/users')
       .then(response => response.json())
-      .then(data => setMessage(data.message))
+      .then(data => setUser(data[0]))
       .catch(error => console.error('Error:', error));
   }, []);
 
@@ -19,10 +20,9 @@ const HomeScreen = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Fit Net</Text>
-        <Text>{message}</Text>
       </View>
       <View style={styles.content}>
-        <Text style={styles.subtitle}>Welcome to your fitness journey!</Text>
+        <Text style={styles.subtitle}>Welcome back {user.name}!</Text>
         <Button
           title="Add New Exercise"
           onPress={() => navigation.navigate('AddExercise')}

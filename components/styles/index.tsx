@@ -23,6 +23,20 @@ export default StyleSheet.create({
         marginBottom: 24,
         color: '#fff',
     },
+    exerciseTitle: {
+        textAlign: 'center',
+        fontWeight: 'bold',
+        fontSize: 24,
+        marginBottom: 4,
+    },
+    exerciseContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    exerciseContent: {
+        alignItems: 'center',
+    },
     header: {
         backgroundColor: '#1e88e5',
         padding: 20,
@@ -49,4 +63,29 @@ export default StyleSheet.create({
         textAlign: 'center',
         marginBottom: 20,
     },
+    exercisesContainer: {
+        marginTop: 16,
+      },
+      exerciseItem: {
+        backgroundColor: '#f0f0f0',
+        padding: 12,
+        marginBottom: 8,
+      },
+      exerciseName: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 4,
+      },
+      tagsContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+      },
+      tag: {
+        backgroundColor: '#e0e0e0',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 4,
+        marginRight: 4,
+        marginBottom: 4,
+      },
 });

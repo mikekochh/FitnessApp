@@ -1,54 +1,91 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, StyleSheet, Text, FlatList } from 'react-native';
+import { Exercise } from '../components/types';
+import styles from '../components/styles';
+import { API_BASE_URL, API_EXERCISES_ENDPOINT } from '../components/constants';
 
 const AddExerciseScreen = ({ navigation }) => {
   const [exerciseName, setExerciseName] = useState('');
-  const [exerciseTags, setExerciseTags] = useState('');
+  const [primaryMuscleGroup, setPrimaryMuscleGroup] = useState('');
+  const [secondaryMuscleGroup, setSecondaryMuscleGroup] = useState('');
   const [exercises, setExercises] = useState([]);
 
+  const userID = "60a1c5f0a5d4f8a0b8c9d1e2";
+
+  useEffect(() => {
+    const fetchExercises = async () => {
+      try {
+        const response = await fetch(API_BASE_URL + API_EXERCISES_ENDPOINT);
+        console.log("response: ", response);
+        if (response.ok) {
+          const data = await response.json();
+          setExercises(data);
+        } else {
+          console.error('Error fetching exercises:', response.status);
+        }
+      } catch (error) {
+        console.error('Error fetching exercises:', error);
+      }
+    };
+
+    fetchExercises();
+  }, []);
+
   const handleSubmit = () => {
-    if (exerciseName.trim() !== '') {
-      const tags = exerciseTags.split(',').map(tag => tag.trim());
-      const newExercise = {
-        name: exerciseName,
-        tags: tags,
-      };
-      setExercises([...exercises, newExercise]);
-      setExerciseName('');
-      setExerciseTags('');
-    }
+    const data = {
+      name: exerciseName,
+      primaryMuscleGroup,
+      secondaryMuscleGroup,
+      userID,
+    };
+  
+    fetch(API_BASE_URL + API_EXERCISES_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        console.log("Exercise submitted successfully:", result);
+      })
+      .catch((error) => {
+        console.error("Error submitting exercise:", error);
+      });
   };
 
   const renderExerciseItem = ({ item }) => (
     <View style={styles.exerciseItem}>
       <Text style={styles.exerciseName}>{item.name}</Text>
-      <View style={styles.tagsContainer}>
-        {item.tags.map((tag, index) => (
-          <Text key={index} style={styles.tag}>
-            {tag}
-          </Text>
-        ))}
-      </View>
     </View>
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Add Exercise</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Exercise Name"
-        value={exerciseName}
-        onChangeText={setExerciseName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Tags (comma-separated)"
-        value={exerciseTags}
-        onChangeText={setExerciseTags}
-      />
-      <Button title="Submit" onPress={handleSubmit} />
-
+    <View>
+      <View>
+        <View>
+          <TextInput
+            style={styles.input}
+            placeholder="Exercise Name"
+            value={exerciseName}
+            onChangeText={setExerciseName}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Primary Muscle Group"
+            value={primaryMuscleGroup}
+            onChangeText={setPrimaryMuscleGroup}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Secondary Muscle Group"
+            value={secondaryMuscleGroup}
+            onChangeText={setSecondaryMuscleGroup}
+          />
+          <Button title="Submit" onPress={handleSubmit} />
+        </View>
+      </View>
       <View style={styles.exercisesContainer}>
         <FlatList
           data={exercises}
@@ -61,49 +98,5 @@ const AddExerciseScreen = ({ navigation }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-  },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 12,
-    paddingHorizontal: 8,
-  },
-  exercisesContainer: {
-    marginTop: 16,
-  },
-  exerciseItem: {
-    backgroundColor: '#f0f0f0',
-    padding: 12,
-    marginBottom: 8,
-  },
-  exerciseName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  tagsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  tag: {
-    backgroundColor: '#e0e0e0',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-    marginRight: 4,
-    marginBottom: 4,
-  },
-  title: {
-    textAlign: 'center',
-    fontWeight: 'bold',
-    fontSize: 24,
-    marginBottom: 4,
-  },
-});
 
 export default AddExerciseScreen;

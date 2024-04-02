@@ -1,10 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, StyleSheet, Text, FlatList } from 'react-native';
+import { API_BASE_URL, API_EXERCISES_ENDPOINT } from '../components/constants';
+import CheckBox from '@react-native-community/checkbox';
 
 const AddWorkoutScreen = ({ navigation }) => {
   const [workoutLength, setWorkoutLength] = useState('');
   const [exercisesHit, setExercisesHit] = useState('');
   const [workouts, setWorkouts] = useState([]);
+  const [exercises, setExercises] = useState([]);
+
+  useEffect(() => {
+    const fetchExercises = async () => {
+      try {
+        const response = await fetch(API_BASE_URL + API_EXERCISES_ENDPOINT);
+        console.log("response: ", response);
+        if (response.ok) {
+          const data = await response.json();
+          setExercises(data);
+        } else {
+          console.error('Error fetching exercises:', response.status);
+        }
+      } catch (error) {
+        console.error('Error fetching exercises:', error);
+      }
+    };
+
+    fetchExercises();
+  }, []);
 
   const handleSubmit = () => {
     if (workoutLength.trim() !== '') {
@@ -19,15 +41,19 @@ const AddWorkoutScreen = ({ navigation }) => {
     }
   };
 
+
+  const handleCheckboxChange = (itemID, value) => {
+
+  }
+
   const renderWorkoutItem = ({ item }) => (
     <View style={styles.workoutItem}>
-      <Text style={styles.workoutLength}>Length: {item.length}</Text>
-      <View style={styles.exercisesContainer}>
-        {item.exercises.map((exercise, index) => (
-          <Text key={index} style={styles.exercise}>
-            {exercise}
-          </Text>
-        ))}
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <CheckBox
+          value={item.completed}
+          onValueChange={(value) => handleCheckboxChange(item.id, value)}
+        />
+        <Text style={{ marginLeft: 20 }}>{item.name} - {item.primaryMuscleGroup}</Text>
       </View>
     </View>
   );
@@ -51,7 +77,7 @@ const AddWorkoutScreen = ({ navigation }) => {
 
       <View style={styles.workoutsContainer}>
         <FlatList
-          data={workouts}
+          data={exercises}
           renderItem={renderWorkoutItem}
           keyExtractor={(item, index) => index.toString()}
         />

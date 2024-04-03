@@ -1,16 +1,75 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, Alert } from 'react-native';
 import styles from '../components/styles';
+import { API_BASE_URL, API_USERS_ENDPOINT } from '../components/constants';
 
 const CreateAccountScreen = ({ navigation }) => {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
 
-  const handleCreateAccount = () => {
-    // Perform account creation logic here
-    // If account creation is successful, navigate to the login screen
-    navigation.navigate('Login');
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const handleCreateAccount = async () => {
+
+    setLoading(true);
+
+    const checkUsername = await fetch(API_BASE_URL + API_USERS_ENDPOINT + "/username/" + username)
+    const jsonUsername = await checkUsername.json();
+
+    if (jsonUsername.username) {
+      Alert.alert('An account with this username already exists');
+      setLoading(false);
+      return;
+    }
+
+    const checkEmail = await fetch(API_BASE_URL + API_USERS_ENDPOINT + "/email/" + email)
+    const jsonEmail = await checkEmail.json();
+
+    if (jsonEmail.email) {
+      Alert.alert('An account with this email address already exists');
+      setLoading(false);
+      return;
+    }
+
+    if (username.trim() === '') {
+      Alert.alert('Please enter a valid username');
+      setLoading(false);
+      return;
+    }
+    if (email.trim() === '') {
+      Alert.alert('Please enter a valid email');
+      setLoading(false);
+      return;
+    }
+    if (password.trim() === '') {
+      Alert.alert('Please enter a valid password');
+      setLoading(false);
+      return;
+    }
+
+    const response = await fetch(API_BASE_URL + API_USERS_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+          username: username,
+          email: email,
+          password: password,
+      }),
+    });
+
+    if (response.ok) {
+      // User should be logged in once they create an account as well
+      navigation.navigate('Home');
+    } else {
+      // Account creation failed
+      const errorData = await response.json();
+      Alert.alert('Account creation failed', errorData.message);
+    }
+
+    setLoading(false);
   };
 
   return (
@@ -39,6 +98,9 @@ const CreateAccountScreen = ({ navigation }) => {
         secureTextEntry
       />
       <Button title="Create Account" onPress={handleCreateAccount} />
+      <Text>
+        {loading ? "Loading..." : ""}
+      </Text>
     </View>
   );
 };

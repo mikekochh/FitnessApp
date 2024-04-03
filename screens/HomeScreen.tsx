@@ -3,13 +3,14 @@ import { SafeAreaView, StyleSheet, Button, Text, View } from 'react-native';
 import styles from '../components/styles';
 import { useEffect, useState } from 'react';
 import { User } from '../components/types';
+import { API_BASE_URL, API_USERS_ENDPOINT } from '../components/constants';
 
 const HomeScreen = ({ navigation }) => {
 
   const [user, setUser] = useState<User>({} as User);
 
   useEffect(() => {
-    fetch(process.env.DOMAIN_URL + '/users')
+    fetch(API_BASE_URL + API_USERS_ENDPOINT)
       .then(response => response.json())
       .then(data => setUser(data[0]))
       .catch(error => console.error('Error:', error));

@@ -1,9 +1,17 @@
+// export interface User {
+//     id: string;
+//     username: string;
+//     email: string;
+//     password: string;
+//     createData: Date;
+// }
+
+// export interface UserState extends Omit<User, 'password' | 'createData'> {}
+
 export interface User {
     id: string;
     username: string;
     email: string;
-    password: string;
-    createData: Date;
 }
 
 export interface Exercise {

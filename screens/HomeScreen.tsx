@@ -19,7 +19,8 @@ const HomeScreen = ({ navigation }) => {
       </View>
       <View style={styles.content}>
         <Text style={styles.subtitle}>
-          {user ? `Welcome back ${user.username}!` : "Login"}</Text>
+          {user && `Welcome back ${user.username}!`}
+        </Text>
         <Button
           title="Add New Exercise"
           onPress={() => navigation.navigate('AddExercise')}
@@ -30,16 +31,21 @@ const HomeScreen = ({ navigation }) => {
           onPress={() => navigation.navigate('AddWorkout')}
           color="#1e88e5"
         />
-        <Button
-          title="Login"
-          onPress={() => navigation.navigate('Login')}
-          color="#1e88e5"
-        />
-        <Button
-          title="Logout"
-          onPress={handleLogoutPress}
-          color="#1e88e5"
-        />
+        {!user ? 
+          (
+          <Button
+            title="Login"
+            onPress={() => navigation.navigate('Login')}
+            color="#1e88e5"
+          />
+          ) : 
+          (
+          <Button
+            title="Logout"
+            onPress={handleLogoutPress}
+            color="#1e88e5"
+          />
+          )}
       </View>
     </SafeAreaView>
   );

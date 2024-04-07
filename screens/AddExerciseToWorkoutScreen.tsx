@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, FlatList } from 'react-native';
+import { View, TextInput, Button, Text, Image, Alert, TouchableOpacity } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import { API_BASE_URL, API_SETS_ENDPOINT } from '../components/constants';
 import { Set } from '../components/types';
@@ -7,26 +7,23 @@ import { AuthContext } from '../components/context/AuthProvider';
 
 const AddExerciseToWorkoutScreen = ({ route, navigation }) => {
     const { exercise } = route.params;
-    const [setCount, setSetCount] = useState(0);
     const setRefs = useRef<Set[]>([]);
-    const [sets, setSets] = useState();
+    const [sets, setSets] = useState<Set[]>([]);
+    const [originalSetCount, setOriginalSetCount] = useState<number>(0);
 
     const { workout } = useContext(AuthContext) ?? {};
 
     useEffect(() => {
       const findExistingSets = async () => {
         const exerciseID = exercise._id;
-        console.log("exerciseID: ", exerciseID);
         try {
           const response = await fetch(API_BASE_URL + API_SETS_ENDPOINT + "/workoutID/" + workout?.workoutID);
           if (response.ok) {
             const data = await response.json();
-            console.log("data: ", data);
     
-            // Check if any set matches the exerciseID
             const matchingExerciseSets = data.filter(set => set.exerciseID === exerciseID);
             setSets(matchingExerciseSets);
-            console.log("matchingSets: ", sets);
+            setOriginalSetCount(matchingExerciseSets.length);
           }
           else {
             console.error('Error fetching user sets: ', response.status);
@@ -41,60 +38,85 @@ const AddExerciseToWorkoutScreen = ({ route, navigation }) => {
     }, [])
   
     const handleAddSet = () => {
-      setSetCount(prevCount => prevCount + 1);
+      setSets([...sets, {}]);
     };
 
     const handleFinishExercise = async () => {
-        try {
-          await Promise.all(
-            setRefs.current.map(async (setRef) => {
-              const response = await fetch(API_BASE_URL + API_SETS_ENDPOINT, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  workoutID: workout?.workoutID,
-                  exerciseID: exercise._id,
-                  reps: parseInt(setRef.reps),
-                  weight: parseFloat(setRef.weight),
-                  weightUnit: setRef.weightUnit,
-                }),
-              });
-      
-              if (!response.ok) {
-                throw new Error('Failed to save set data');
-              }
-            })
-          );
-      
-          console.log('All sets saved successfully');
-          navigation.navigate("StartWorkout");
-        } catch (error) {
-          console.error('Error saving sets:', error);
-        }
-      };
-  
-      const renderNewSets = () => {
-        if (sets?.length > 0) {
-          return sets?.map((set, index) => (
-            <NewSetComponent
-              key={index}
-              index={index + 1}
-              initialReps={set.reps}
-              initialWeight={set.weight}
-              initialWeightUnit={set.weightUnit}
-              ref={(ref) => (setRefs.current[index] = ref)}
-            />
-          ));
-        } else {
-          const sets = [];
-          for (let i = 0; i < setCount; i++) {
-            sets.push(<NewSetComponent key={i} index={i + 1} ref={(ref) => (setRefs.current[i] = ref)} />);
+      try {
+        const newSetRefs = setRefs.current.slice(originalSetCount);
+    
+        // Check if any of the sets are missing weight or reps
+        for (let i = 0; i < newSetRefs.length; i++) {
+          const setRef = newSetRefs[i];
+          const setNumber = i + 1;
+    
+          if (!setRef.reps) {
+            Alert.alert('Please fill in reps for set ' + setNumber);
+            return;
           }
-          return sets;
+          if (!setRef.weight) {
+            Alert.alert('Please fill in weight for set ' + setNumber);
+            return;
+          }
         }
-      };
+    
+        // If all sets have weight and reps, proceed with the API requests
+        await Promise.all(
+          newSetRefs.map(async (setRef) => {
+            const response = await fetch(API_BASE_URL + API_SETS_ENDPOINT, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                workoutID: workout?.workoutID,
+                exerciseID: exercise._id,
+                reps: parseInt(setRef.reps),
+                weight: parseFloat(setRef.weight),
+                weightUnit: setRef.weightUnit,
+              }),
+            });
+    
+            if (!response.ok) {
+              throw new Error('Failed to save set data');
+            }
+          })
+        );
+    
+        console.log('All sets saved successfully');
+        navigation.navigate("StartWorkout");
+      } catch (error) {
+        console.error('Error saving sets:', error);
+      }
+    };
+
+    const removeSet = (index) => {
+      // this issue is that everything in the sets array is not updated, so it is 
+      // removing a layer but the data is just shuffling
+      console.log("index: ", index);
+      console.log("sets.length: ", sets.length);
+      setSets((prevSets) => {
+        const updatedSets = [...prevSets];
+        console.log("updatedSets: ", updatedSets);
+        console.log("updatedSets[index]: ", updatedSets[index]);
+        updatedSets.splice(index - sets.length, 1);
+        return updatedSets;
+      });
+    };
+
+    const renderNewSets = () => {
+      return sets?.map((set, index) => (
+        <NewSetComponent
+            key={index}
+            index={index + 1}
+            initialReps={set.reps}
+            initialWeight={set.weight}
+            initialWeightUnit={set.weightUnit}
+            removeSet={removeSet}
+            ref={(ref) => (setRefs.current[index] = ref)}
+          />
+      ))
+    };
   
     return (
       <View>
@@ -106,7 +128,7 @@ const AddExerciseToWorkoutScreen = ({ route, navigation }) => {
     );
   };
   
-  const NewSetComponent = React.forwardRef(({ index, initialReps, initialWeight, initialWeightUnit }, ref) => {
+  const NewSetComponent = React.forwardRef(({ index, initialReps, initialWeight, initialWeightUnit, removeSet }, ref) => {
     const [reps, setReps] = useState(initialReps ? initialReps.toString() : '');
     const [weight, setWeight] = useState(initialWeight ? initialWeight.toString() : '');
     const [weightUnit, setWeightUnit] = useState(initialWeightUnit || 'lbs');
@@ -119,11 +141,22 @@ const AddExerciseToWorkoutScreen = ({ route, navigation }) => {
   
     return (
       <View>
-        <Text style={{ fontSize: 18, marginBottom: 20, textAlign: 'center' }}>Set {index}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
+          <Text style={{ fontSize: 18 }}>Set {index}</Text>
+          <TouchableOpacity onPress={() => removeSet(index)}>
+            <Image
+              source={require('../assets/images/trash-icon.png')}
+              style={{ width: 20, height: 20, marginLeft: 10 }}
+            />
+          </TouchableOpacity>
+        </View>
         <TextInput
           placeholder="Reps"
           value={reps}
-          onChangeText={setReps}
+          onChangeText={(text) => {
+            const digitsOnly = text.replace(/\D/g, '');
+            setReps(digitsOnly);
+          }}
           keyboardType="numeric"
           style={{ fontSize: 18, padding: 5, borderWidth: 1, borderColor: 'gray', marginBottom: 10, width: '20%' }}
         />
@@ -131,7 +164,10 @@ const AddExerciseToWorkoutScreen = ({ route, navigation }) => {
           <TextInput
             placeholder="Weight"
             value={weight}
-            onChangeText={setWeight}
+            onChangeText={(text) => {
+              const digitsOnly = text.replace(/\D/g, '');
+              setWeight(digitsOnly);
+            }}
             keyboardType="numeric"
             style={{ fontSize: 18, padding: 5, borderWidth: 1, borderColor: 'gray', marginRight: 10, flex: 1, width: "20%" }}
           />

@@ -1,15 +1,17 @@
 // AuthContext.tsx
 import React, { createContext, useState } from 'react';
 import { Alert } from 'react-native';
-import { API_BASE_URL, API_USERS_ENDPOINT } from '../constants';
-import { User } from '../types';
+import { API_BASE_URL, API_USERS_ENDPOINT, API_WORKOUTS_ENDPOINT } from '../constants';
+import { User, Workout } from '../types';
 
 export interface AuthContextType {
   user: User | null;
   loading: boolean;
+  workout: Workout | null;
   handleLogin: (username: string, password: string, navigation: any) => Promise<void>;
   handleLogout: (navigation: any) => void;
   handleCreateAccount: (username: string, password: string, email: string, navigation: any) => Promise<void>;
+  startWorkout: (navigation: any) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -17,6 +19,46 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
+  const [workout, setWorkout] = useState<Workout | null>(null);
+
+  const startWorkout = async (navigation: any) => {
+    console.log("starting new workout...");
+    if (!user) {
+      Alert.alert("Please sign in or create an account to continue");
+      return;
+    }
+
+    try {
+
+      console.log("userID: ", user.id);
+
+      const response = await fetch(API_BASE_URL + API_WORKOUTS_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userID: user.id,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("data: ", data);
+        setWorkout({
+          workoutID: data._id,
+          userID: user.id,
+        });
+        navigation.replace('StartWorkout');
+      } else {
+        const errorData = await response.json();
+        Alert.alert('Starting new workout failed', errorData.message);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      Alert.alert('Start Workout failed', 'An error occurred during starting workout.');
+    }
+  }
 
   const handleLogin = async (username: string, password: string, navigation: any) => {
     console.log("logging in...");
@@ -132,7 +174,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, handleLogin, handleCreateAccount, handleLogout }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      loading, 
+      handleLogin, 
+      handleCreateAccount, 
+      handleLogout,
+      workout,
+      startWorkout
+    }}>
       {children}
     </AuthContext.Provider>
   );

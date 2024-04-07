@@ -5,12 +5,19 @@ import { AuthContext } from '../components/context/AuthProvider';
 
 const HomeScreen = ({ navigation }) => {
 
-  const { user, handleLogout } = useContext(AuthContext) ?? {};
+  const { user, handleLogout, startWorkout, workout } = useContext(AuthContext) ?? {};
 
   const handleLogoutPress = () => {
     handleLogout?.(navigation);
   }
 
+  const handleStartWorkout = () => {
+    startWorkout?.(navigation)
+  }
+
+  const handleContinueWorkout = () => {
+    navigation.navigate('StartWorkout')
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -26,11 +33,19 @@ const HomeScreen = ({ navigation }) => {
           onPress={() => navigation.navigate('AddExercise')}
           color="#1e88e5"
         />
+        {!workout ? (
         <Button
-          title="Add New Workout"
-          onPress={() => navigation.navigate('AddWorkout')}
+          title="Start Workout"
+          onPress={handleStartWorkout}
           color="#1e88e5"
         />
+        ) : (
+        <Button
+          title="Continue Workout"
+          onPress={handleContinueWorkout}
+          color="#1e88e5"
+        />
+        )}
         {!user ? 
           (
           <Button

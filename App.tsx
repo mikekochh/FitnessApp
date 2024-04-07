@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import AddExerciseScreen from './screens/AddExerciseScreen';
-import AddWorkoutScreen from './screens/AddWorkoutScreen';
+import StartWorkoutScreen from './screens/StartWorkoutScreen';
 import LoginScreen from './screens/LoginScreen';
 import HomeScreen from './screens/HomeScreen';
 import CreateAccountScreen from './screens/CreateAccountScreen';
+import AddExerciseToWorkoutScreen from './screens/AddExerciseToWorkoutScreen';
 import 'react-native-gesture-handler';
 import { AuthProvider } from './components/context/AuthProvider';
 
@@ -28,9 +29,9 @@ const App = () => {
             options={{ title: 'Add New Exercise' }}
           />
           <Stack.Screen
-            name="AddWorkout"
-            component={AddWorkoutScreen}
-            options={{ title: 'Add Workout Exercise' }}
+            name="StartWorkout"
+            component={StartWorkoutScreen}
+            options={{ title: 'Your Workout' }}
           />
           <Stack.Screen
             name="Login"
@@ -41,6 +42,11 @@ const App = () => {
             name="CreateAccount"
             component={CreateAccountScreen}
             options={{ title: 'Create an Account' }}
+          />
+          <Stack.Screen 
+            name="AddExerciseToWorkout"
+            component={AddExerciseToWorkoutScreen}
+            options={{ title: "Add Exercise"}}
           />
         </Stack.Navigator>
       </NavigationContainer>

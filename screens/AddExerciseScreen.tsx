@@ -1,16 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, FlatList } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { View, TextInput, Button, StyleSheet, Text, FlatList, ScrollView } from 'react-native';
 import { Exercise } from '../components/types';
 import styles from '../components/styles';
 import { API_BASE_URL, API_EXERCISES_ENDPOINT } from '../components/constants';
+import { AuthContext } from '../components/context/AuthProvider';
 
 const AddExerciseScreen = ({ navigation }) => {
-  const [exerciseName, setExerciseName] = useState('');
+  const [exerciseName, setExerciseName] = useState<string>('');
   const [primaryMuscleGroup, setPrimaryMuscleGroup] = useState('');
   const [secondaryMuscleGroup, setSecondaryMuscleGroup] = useState('');
-  const [exercises, setExercises] = useState([]);
+  const [exercises, setExercises] = useState<Exercise[]>([]);
 
-  const userID = "60a1c5f0a5d4f8a0b8c9d1e2";
+  const { user } = useContext(AuthContext) ?? {};
+
+  const handleSubmit = () => {
+    const newExercise = {
+      name: exerciseName,
+      primaryMuscleGroup,
+      secondaryMuscleGroup,
+      userID: user?.id || '',
+    };
+
+    setExercises(prevExercises => [...prevExercises, newExercise]);
+  
+    fetch(API_BASE_URL + API_EXERCISES_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newExercise),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        console.log("Exercise submitted successfully:", result);
+      })
+      .catch((error) => {
+        console.error("Error submitting exercise:", error);
+      });
+  };
 
   useEffect(() => {
     const fetchExercises = async () => {
@@ -31,33 +58,19 @@ const AddExerciseScreen = ({ navigation }) => {
     fetchExercises();
   }, []);
 
-  const handleSubmit = () => {
-    const data = {
-      name: exerciseName,
-      primaryMuscleGroup,
-      secondaryMuscleGroup,
-      userID,
-    };
-  
-    fetch(API_BASE_URL + API_EXERCISES_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    })
-      .then((response) => response.json())
-      .then((result) => {
-        console.log("Exercise submitted successfully:", result);
-      })
-      .catch((error) => {
-        console.error("Error submitting exercise:", error);
-      });
-  };
-
   const renderExerciseItem = ({ item }) => (
-    <View style={styles.exerciseItem}>
-      <Text style={styles.exerciseName}>{item.name}</Text>
+    <View style={{
+      backgroundColor: '#e0e0e0',
+      padding: 12,
+      marginBottom: 8,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    }}>
+      <View>
+        <Text style={styles.exerciseName}>{item.name}</Text>
+        <Text style={{fontSize: 12}}>{item.primaryMuscleGroup}</Text>
+      </View>
     </View>
   );
 
@@ -93,10 +106,21 @@ const AddExerciseScreen = ({ navigation }) => {
           keyExtractor={(item, index) => index.toString()}
         />
       </View>
-
       <Button title="Back" onPress={() => navigation.navigate('Home')} />
     </View>
   );
 };
 
 export default AddExerciseScreen;
+
+const stylesTemp = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  exercisesContainer: {
+    height: 400, // Adjust the height as needed
+  },
+});

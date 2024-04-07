@@ -7,8 +7,19 @@ export interface User {
 export interface Exercise {
     _id: string;
     name: string;
-    user: User;
+    userID: string;
     primaryMuscleGroup: string;
     secondaryMuscleGroup?: string;
-    createdDate: Date;
+}
+
+export interface Set {
+    exerciseID: string;
+    reps: number;
+    weight: number;
+    weightUnit: string;
+}
+
+export interface Workout {
+    workoutID: string;
+    userID: string;
 }

@@ -22,4 +22,5 @@ export interface Set {
 export interface Workout {
     workoutID: string;
     userID: string;
+    inProgress: boolean;
 }

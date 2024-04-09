@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { View, TextInput, Button, StyleSheet, Text, FlatList } from 'react-native';
-import { API_BASE_URL, API_EXERCISES_ENDPOINT, API_SETS_ENDPOINT } from '../components/constants';
+import { 
+  API_BASE_URL, 
+  API_EXERCISES_ENDPOINT, 
+  API_SETS_ENDPOINT, 
+  API_WORKOUTS_ENDPOINT, 
+  API_MAXWEIGHT_ENDPOINT 
+} from '../components/constants';
 import { Exercise, Set } from '../components/types';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { AuthContext } from '../components/context/AuthProvider';
@@ -12,7 +18,7 @@ const StartWorkoutScreen = ({ navigation }) => {
   const [filteredExercises, setFilteredExercises] = useState<Exercise[]>([]);
   const [userSets, setUserSets] = useState<Set[]>([]);
 
-  const { workout } = useContext(AuthContext) ?? {};
+  const { workout, setWorkout } = useContext(AuthContext) ?? {};
 
   useEffect(() => {
     const handleSearch = () => {
@@ -66,6 +72,25 @@ const StartWorkoutScreen = ({ navigation }) => {
     fetchExercises();
   }, []);
 
+  const handleDoneWorkout = async () => {
+    try {
+      const response = await fetch(API_BASE_URL + API_WORKOUTS_ENDPOINT + "/complete/" + workout?.workoutID, {
+        method: 'PATCH',
+       });
+      if (response.ok) {
+        if (setWorkout) {
+          setWorkout(null)
+        }
+      }
+      else {
+        console.error('Error completing workout: ', response.status);
+      }
+    } catch (error) {
+      console.error('Error completing workout: ', error);
+    }
+    navigation.navigate("Home");
+  }
+
   const renderWorkoutItem = ({ item }: { item: Exercise }) => (
     <View style={styles.workoutItem}>
       <TouchableOpacity onPress={() => navigation.navigate('AddExerciseToWorkout', { exercise: item })}>
@@ -75,23 +100,6 @@ const StartWorkoutScreen = ({ navigation }) => {
       </TouchableOpacity>
     </View>
   );
-
-  // const renderExerciseItem = () => {
-
-  //   // were going to need to find all the different types of exercise IDs, and then make a exercise box for each
-  //   // one of them and then aggregate the sets within the box
-
-  //   const totalWeight = userSets.reduce((total, set) => total + set.reps * set.weight, 0);
-
-  //   const exercise = exercises.find(ex => ex._id === userSets[0].exerciseID);
-
-  //   return (
-  //     <View>
-  //       <Text>{exercise?.name}</Text>
-  //       <Text>{totalWeight} {userSets[0].weightUnit}</Text>
-  //     </View>
-  //   )
-  // }
 
   const renderExerciseItem = () => {
     // Group the sets by exerciseID
@@ -125,21 +133,11 @@ const StartWorkoutScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View>
+        <Button title="Done Workout" onPress={handleDoneWorkout}/>
+      </View>
+      <View>
         {renderExerciseItem()}
       </View>
-      {/* <View>
-        {userSets.map((set, index) => (
-          <View key={index}>
-            {renderExerciseItem}
-            <Text>Reps: {set.reps}</Text>
-            <Text>Weight: {set.weight}</Text>
-            <Text>Weight Unit: {set.weightUnit}</Text>
-            <View style={styles.separator} />
-          </View>
-        ))}
-      </View> */}
-
-
       <Text style={styles.title}>Search Exercises</Text>
       <TextInput
         style={styles.input}

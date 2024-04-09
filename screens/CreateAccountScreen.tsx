@@ -8,10 +8,14 @@ const CreateAccountScreen = ({ navigation }) => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
 
-  const { handleLogin, loading, handleCreateAccount } = useContext(AuthContext) ?? {};
+  const { loading, handleCreateAccount } = useContext(AuthContext) ?? {};
 
   const handleCreateAccountPress = () => {
     handleCreateAccount?.(username, password, email, navigation);
+  }
+
+  const handleLoginPress = () => {
+    navigation.navigate("Login");
   }
 
   return (
@@ -39,10 +43,12 @@ const CreateAccountScreen = ({ navigation }) => {
         onChangeText={setPassword}
         secureTextEntry
       />
-      <Button title="Create Account" onPress={handleCreateAccountPress} />
-      <Text>
-        {loading ? "Loading..." : ""}
-      </Text>
+      {loading ? (
+        <Text>Loading...</Text>
+      ) : (
+        <Button title="Create Account" onPress={handleCreateAccountPress} />
+      )}
+      <Button title='Already have an account?' onPress={handleLoginPress} />
     </View>
   );
 };

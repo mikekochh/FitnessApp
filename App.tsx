@@ -7,6 +7,7 @@ import LoginScreen from './screens/LoginScreen';
 import HomeScreen from './screens/HomeScreen';
 import CreateAccountScreen from './screens/CreateAccountScreen';
 import AddExerciseToWorkoutScreen from './screens/AddExerciseToWorkoutScreen';
+import PastWorkoutScreen from './screens/PastWorkoutScreen';
 import 'react-native-gesture-handler';
 import { AuthProvider } from './components/context/AuthProvider';
 
@@ -47,6 +48,11 @@ const App = () => {
             name="AddExerciseToWorkout"
             component={AddExerciseToWorkoutScreen}
             options={{ title: "Add Exercise"}}
+          />
+          <Stack.Screen 
+            name="PastWorkouts"
+            component={PastWorkoutScreen}
+            options={{ title: "Workouts"}}
           />
         </Stack.Navigator>
       </NavigationContainer>

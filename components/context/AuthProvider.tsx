@@ -8,6 +8,7 @@ export interface AuthContextType {
   user: User | null;
   loading: boolean;
   workout: Workout | null;
+  setWorkout: (workout: Workout | null) => void;
   handleLogin: (username: string, password: string, navigation: any) => Promise<void>;
   handleLogout: (navigation: any) => void;
   handleCreateAccount: (username: string, password: string, email: string, navigation: any) => Promise<void>;
@@ -39,6 +40,7 @@ export const AuthProvider = ({ children }) => {
         },
         body: JSON.stringify({
           userID: user.id,
+          inProgress: true
         }),
       });
 
@@ -48,6 +50,7 @@ export const AuthProvider = ({ children }) => {
         setWorkout({
           workoutID: data._id,
           userID: user.id,
+          inProgress: true
         });
         navigation.replace('StartWorkout');
       } else {
@@ -94,6 +97,18 @@ export const AuthProvider = ({ children }) => {
           username: data.user.username,
           email: data.user.email,
         });
+
+        const responseWorkout = await fetch(API_BASE_URL + API_WORKOUTS_ENDPOINT + "/inProgress/" + data.user.id);
+
+        const workoutData = await responseWorkout.json();
+        if (workoutData._id) {
+          setWorkout({
+            workoutID: workoutData._id,
+            userID: workoutData.userID,
+            inProgress: workoutData.inProgress
+          });
+        }
+
         navigation.replace('Home');
       } else {
         const errorData = await response.json();
@@ -170,6 +185,7 @@ export const AuthProvider = ({ children }) => {
 
   const handleLogout = (navigation: any) => {
     setUser(null);
+    setWorkout(null);
     navigation.replace('Home');
   };
 
@@ -181,7 +197,8 @@ export const AuthProvider = ({ children }) => {
       handleCreateAccount, 
       handleLogout,
       workout,
-      startWorkout
+      startWorkout,
+      setWorkout
     }}>
       {children}
     </AuthContext.Provider>

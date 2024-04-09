@@ -36,11 +36,12 @@ const LoginScreen = ({ navigation }) => {
         value={password}
         onChangeText={setPassword}
       />
-      <Button title="Login" onPress={handleLoginPress} />
+      {loading ? (
+        <Text>Loading...</Text>
+      ) : (
+        <Button title="Login" onPress={handleLoginPress} />
+      )}
       <Button title="Create an Account" onPress={handleCreateAccount} />
-      <Text>
-        {loading ? "Loading..." : ""}
-      </Text>
     </View>
   );
 };

@@ -112,15 +112,3 @@ const AddExerciseScreen = ({ navigation }) => {
 };
 
 export default AddExerciseScreen;
-
-const stylesTemp = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  exercisesContainer: {
-    height: 400, // Adjust the height as needed
-  },
-});

@@ -7,18 +7,6 @@ const HomeScreen = ({ navigation }) => {
 
   const { user, handleLogout, startWorkout, workout } = useContext(AuthContext) ?? {};
 
-  const handleLogoutPress = () => {
-    handleLogout?.(navigation);
-  }
-
-  const handleStartWorkout = () => {
-    startWorkout?.(navigation)
-  }
-
-  const handleContinueWorkout = () => {
-    navigation.navigate('StartWorkout')
-  }
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -35,17 +23,22 @@ const HomeScreen = ({ navigation }) => {
         />
         {!workout ? (
         <Button
-          title="Start Workout"
-          onPress={handleStartWorkout}
+          title="Start New Workout"
+          onPress={() => startWorkout?.(navigation)}
           color="#1e88e5"
         />
         ) : (
         <Button
           title="Continue Workout"
-          onPress={handleContinueWorkout}
+          onPress={() => navigation.navigate('StartWorkout')}
           color="#1e88e5"
         />
         )}
+        <Button 
+          title="View Past Workouts"
+          onPress={() => navigation.navigate('PastWorkouts')}
+          color="#1e88e5"
+        />
         {!user ? 
           (
           <Button
@@ -57,7 +50,7 @@ const HomeScreen = ({ navigation }) => {
           (
           <Button
             title="Logout"
-            onPress={handleLogoutPress}
+            onPress={() => handleLogout?.(navigation)}
             color="#1e88e5"
           />
           )}

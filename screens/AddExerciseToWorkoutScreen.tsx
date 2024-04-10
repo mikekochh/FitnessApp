@@ -23,7 +23,13 @@ const AddExerciseToWorkoutScreen = ({ route, navigation }) => {
             const data = await response.json();
     
             const matchingExerciseSets = data.filter(set => set.exerciseID === exerciseID);
-            setSets(matchingExerciseSets);
+            if (matchingExerciseSets.length != 0) {
+              setSets(matchingExerciseSets);
+            }
+            else {
+              setSets([{exerciseID: exerciseID, reps: 0, weight: 0, weightUnit: "lbs"}])
+            }
+            
             setOriginalSetCount(matchingExerciseSets.length);
           }
           else {

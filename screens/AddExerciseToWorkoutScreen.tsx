@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { View, TextInput, Button, Text, Image, Alert, TouchableOpacity } from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
-import { API_BASE_URL, API_USERMAXWEIGHT_ENDPOINT, API_SETS_ENDPOINT } from '../components/constants';
+import { 
+  API_BASE_URL, 
+  API_USERMAXWEIGHT_ENDPOINT, 
+  API_SETS_ENDPOINT, 
+  API_USERPR_ENDPOINT 
+} from '../components/constants';
 import { Set } from '../components/types';
 import { AuthContext } from '../components/context/AuthProvider';
 
@@ -11,6 +16,7 @@ const AddExerciseToWorkoutScreen = ({ route, navigation }) => {
     const [sets, setSets] = useState<Set[]>([]);
     const [originalSetCount, setOriginalSetCount] = useState<number>(0);
     const [maxWeight, setMaxWeight] = useState<number>(0);
+    const [PR, setPR] = useState<number>(0);
 
     const { workout } = useContext(AuthContext) ?? {};
 
@@ -46,11 +52,25 @@ const AddExerciseToWorkoutScreen = ({ route, navigation }) => {
         const userID = workout?.userID;
         try {
           const response = await fetch(API_BASE_URL + API_USERMAXWEIGHT_ENDPOINT + "/" + userID + "/" + exerciseID);
-          console.log("response: ", response);
           const data = await response.json()
-          console.log("Data: ", data);
-          console.log("maxWeight: ", data[0].maxWeight);
-          setMaxWeight(data[0].maxWeight);
+          if (data.length) {
+            setMaxWeight(data[0].maxWeight);
+          }
+        } 
+        catch (err) {
+          console.error("error: ", err);
+        }
+      }
+
+      const fetchPR = async () => {
+        const exerciseID = exercise._id;
+        const userID = workout?.userID;
+        try {
+          const response = await fetch(API_BASE_URL + API_USERPR_ENDPOINT + "/" + userID + "/" + exerciseID);
+          const data = await response.json()
+          if (data.length) {
+            setPR(data[0].weight);
+          }
         } 
         catch (err) {
           console.error("error: ", err);
@@ -59,6 +79,7 @@ const AddExerciseToWorkoutScreen = ({ route, navigation }) => {
     
       findExistingSets();
       fetchMaxWeight();
+      fetchPR();
     }, [])
   
     const handleAddSet = () => {
@@ -143,7 +164,7 @@ const AddExerciseToWorkoutScreen = ({ route, navigation }) => {
       <View>
         <Text style={{textAlign: 'center', fontSize: 24, margin: 5, fontWeight: 900}}>{exercise.name}</Text>
         <Text>Max Weight: {maxWeight} lbs</Text>
-        <Text>PR: </Text>
+        <Text>PR: {PR} lbs</Text>
         {renderNewSets()}
         <Button title="Add a set" onPress={handleAddSet} />
         <Button title="Done" onPress={handleFinishExercise} />

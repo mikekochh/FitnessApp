@@ -1,11 +1,41 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { SafeAreaView, Button, Text, View } from 'react-native';
 import styles from '../components/styles';
 import { AuthContext } from '../components/context/AuthProvider';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const HomeScreen = ({ navigation }) => {
 
-  const { user, handleLogout, startWorkout, workout } = useContext(AuthContext) ?? {};
+  const { 
+    user, 
+    handleLogout, 
+    startWorkout, 
+    workout, 
+    handleLogin 
+  } = useContext(AuthContext) ?? {};
+
+  useEffect(() => {
+    console.log("this running?");
+    const checkLoginStatus = async () => {
+      console.log("this should only run when no user logged in");
+      try {
+        const username = await AsyncStorage.getItem('username');
+        const password = await AsyncStorage.getItem('password');
+
+        if (username && password) {
+          await handleLogin?.(username, password, navigation);
+        } else {
+        }
+      } catch (error) {
+        console.log('Error checking login status:', error);
+      }
+    };
+
+    if (!user) {
+      checkLoginStatus();
+    }
+  }, []);
+
 
   return (
     <SafeAreaView style={styles.container}>

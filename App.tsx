@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import AddExerciseScreen from './screens/AddExerciseScreen';
@@ -9,7 +9,8 @@ import CreateAccountScreen from './screens/CreateAccountScreen';
 import AddExerciseToWorkoutScreen from './screens/AddExerciseToWorkoutScreen';
 import PastWorkoutScreen from './screens/PastWorkoutScreen';
 import 'react-native-gesture-handler';
-import { AuthProvider } from './components/context/AuthProvider';
+import { AuthProvider, AuthContext } from './components/context/AuthProvider';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Stack = createStackNavigator();
 

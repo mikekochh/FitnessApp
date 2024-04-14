@@ -12,6 +12,7 @@
     "postgit": "git push"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^1.23.1",
     "@react-native-community/checkbox": "^0.5.17",
     "@react-native-community/masked-view": "^0.1.11",
     "@react-native-picker/picker": "^2.7.2",

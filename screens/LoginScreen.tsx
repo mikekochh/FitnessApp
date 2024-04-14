@@ -1,7 +1,6 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, Button, Alert } from 'react-native';
+import { View, Text, TextInput, Button } from 'react-native';
 import styles from '../components/styles';
-import { User } from '../components/types';
 import { AuthContext } from '../components/context/AuthProvider';
 
 const LoginScreen = ({ navigation }) => {

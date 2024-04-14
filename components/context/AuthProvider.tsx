@@ -3,6 +3,7 @@ import React, { createContext, useState } from 'react';
 import { Alert } from 'react-native';
 import { API_BASE_URL, API_USERS_ENDPOINT, API_WORKOUTS_ENDPOINT } from '../constants';
 import { User, Workout } from '../types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface AuthContextType {
   user: User | null;
@@ -63,6 +64,15 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  const storeLoginDetails = async (username: string, password: string) => {
+    try {
+      await AsyncStorage.setItem('username', username);
+      await AsyncStorage.setItem('password', password);
+    } catch (error) {
+      console.log('Error storing login details: ', error);
+    }
+  }
+
   const handleLogin = async (username: string, password: string, navigation: any) => {
     console.log("logging in...");
     setLoading(true);
@@ -97,6 +107,8 @@ export const AuthProvider = ({ children }) => {
           username: data.user.username,
           email: data.user.email,
         });
+
+        await storeLoginDetails(username, password);
 
         const responseWorkout = await fetch(API_BASE_URL + API_WORKOUTS_ENDPOINT + "/inProgress/" + data.user.id);
 
@@ -183,10 +195,17 @@ export const AuthProvider = ({ children }) => {
   };
 
 
-  const handleLogout = (navigation: any) => {
-    setUser(null);
-    setWorkout(null);
-    navigation.replace('Home');
+  const handleLogout = async (navigation: any) => {
+    try {
+      setUser(null);
+      setWorkout(null);
+
+      await AsyncStorage.removeItem('username');
+      await AsyncStorage.removeItem('password');
+      navigation.replace('Home');
+    } catch (error) {
+      console.log('Error logging out: ', error);
+    }
   };
 
   return (

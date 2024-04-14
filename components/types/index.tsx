@@ -10,6 +10,7 @@ export interface Exercise {
     userID: string;
     primaryMuscleGroup: string;
     secondaryMuscleGroup?: string;
+    isBodyweight: boolean;
 }
 
 export interface Set {

@@ -163,6 +163,7 @@ const AddExerciseToWorkoutScreen = ({ route, navigation }) => {
     return (
       <View>
         <Text style={{textAlign: 'center', fontSize: 24, margin: 5, fontWeight: 900}}>{exercise.name}</Text>
+        <Text>Body Weight</Text>
         <Text>Max Weight: {maxWeight} lbs</Text>
         <Text>PR: {PR} lbs</Text>
         {renderNewSets()}

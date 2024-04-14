@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, FlatList, ScrollView } from 'react-native';
+import { 
+  View, 
+  TextInput, 
+  Button, 
+  Text, 
+  FlatList, 
+  Switch
+} from 'react-native';
 import { Exercise } from '../components/types';
 import styles from '../components/styles';
 import { API_BASE_URL, API_EXERCISES_ENDPOINT } from '../components/constants';
@@ -9,6 +16,7 @@ const AddExerciseScreen = ({ navigation }) => {
   const [exerciseName, setExerciseName] = useState<string>('');
   const [primaryMuscleGroup, setPrimaryMuscleGroup] = useState('');
   const [secondaryMuscleGroup, setSecondaryMuscleGroup] = useState('');
+  const [isBodyweight, setIsBodyweight] = useState<boolean>(false);
   const [exercises, setExercises] = useState<Exercise[]>([]);
 
   const { user } = useContext(AuthContext) ?? {};
@@ -19,6 +27,7 @@ const AddExerciseScreen = ({ navigation }) => {
       primaryMuscleGroup,
       secondaryMuscleGroup,
       userID: user?.id || '',
+      isBodyweight,
     };
 
     setExercises(prevExercises => [...prevExercises, newExercise]);
@@ -96,6 +105,13 @@ const AddExerciseScreen = ({ navigation }) => {
             value={secondaryMuscleGroup}
             onChangeText={setSecondaryMuscleGroup}
           />
+          <View style={styles.switchContainer}>
+            <Text style={styles.switchLabel}>Bodyweight Exercise:</Text>
+            <Switch
+              value={isBodyweight}
+              onValueChange={setIsBodyweight}
+            />
+          </View>
           <Button title="Submit" onPress={handleSubmit} />
         </View>
       </View>
